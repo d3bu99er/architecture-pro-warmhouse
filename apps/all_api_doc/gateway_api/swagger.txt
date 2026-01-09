@@ -1,0 +1,298 @@
+openapi: 3.0.3
+info:
+  title: Smart Home API Gateway
+  version: 1.0.0
+  description: АПИ шлюз для микросервисной архитектуры Smart Home Pro (Backend for Frontend)
+
+servers:
+  - url: http://localhost:8000
+    description: Локальный API Gateway
+
+paths:
+  /health:
+    get:
+      summary: Проверка состояния шлюза
+      tags: [Health]
+      responses:
+        '200':
+          description: Сервис работает корректно
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  service:
+                    type: string
+                    example: api-gateway
+                  timestamp:
+                    type: integer
+                    example: 1736412000
+
+  /gateway/status:
+    get:
+      summary: Получить статус API шлюза
+      tags: [Gateway]
+      responses:
+        '200':
+          description: Текущий статус шлюза и адреса сервисов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GatewayStatus'
+
+  /gateway/services:
+    get:
+      summary: Получить список зарегистрированных сервисов
+      tags: [Gateway]
+      responses:
+        '200':
+          description: Список сервисов, доступных через шлюз
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceInfo'
+
+  /api/v1/sensors/{path}:
+    get:
+      summary: Проксировать запрос к Smart Home (sensors)
+      tags: [Proxy]
+      parameters:
+        - name: path
+          in: path
+          required: true
+          description: Оставшаяся часть пути для сервиса датчиков
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Успешный ответ от backend сервиса
+          content:
+            '*/*':
+              schema:
+                type: string
+    post:
+      summary: Проксировать запрос к Smart Home (sensors)
+      tags: [Proxy]
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          '*/*':
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Ответ от backend сервиса
+          content:
+            '*/*':
+              schema:
+                type: string
+    put:
+      summary: Проксировать запрос к Smart Home (sensors)
+      tags: [Proxy]
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          '*/*':
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Ответ от backend сервиса
+          content:
+            '*/*':
+              schema:
+                type: string
+    delete:
+      summary: Проксировать запрос к Smart Home (sensors)
+      tags: [Proxy]
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ответ от backend сервиса
+          content:
+            '*/*':
+              schema:
+                type: string
+
+  /api/v1/devices/{path}:
+    get:
+      summary: Проксировать запрос к Smart Home (devices)
+      tags: [Proxy]
+      parameters:
+        - name: path
+          in: path
+          required: true
+          description: Оставшаяся часть пути для сервиса устройств
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ответ от backend сервиса
+          content:
+            '*/*':
+              schema:
+                type: string
+    post:
+      summary: Проксировать запрос к Smart Home (devices)
+      tags: [Proxy]
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          '*/*':
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Ответ от backend сервиса
+          content:
+            '*/*':
+              schema:
+                type: string
+
+  /api/v1/telemetry/{path}:
+    get:
+      summary: Проксировать запрос к telemetry-service
+      tags: [Proxy]
+      parameters:
+        - name: path
+          in: path
+          required: true
+          description: Оставшаяся часть пути для сервиса телеметрии
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ответ от backend сервиса
+          content:
+            '*/*':
+              schema:
+                type: string
+    post:
+      summary: Проксировать запрос к telemetry-service
+      tags: [Proxy]
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          '*/*':
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Ответ от backend сервиса
+          content:
+            '*/*':
+              schema:
+                type: string
+
+  /{path}:
+    get:
+      summary: Catch‑all прокси на Smart Home App
+      tags: [Proxy]
+      parameters:
+        - name: path
+          in: path
+          required: true
+          description: Любой путь, перенаправляется в Smart Home App
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ответ от Smart Home App
+          content:
+            '*/*':
+              schema:
+                type: string
+    post:
+      summary: Catch‑all прокси на Smart Home App
+      tags: [Proxy]
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          '*/*':
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Ответ от Smart Home App
+          content:
+            '*/*':
+              schema:
+                type: string
+
+components:
+  schemas:
+    GatewayStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          example: running
+        version:
+          type: string
+          example: 1.0.0
+        services:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            smart-home: http://smarthome-app:8080
+            device: http://device-service:8082
+            telemetry: http://telemetry-service:8083
+        timestamp:
+          type: integer
+          example: 1736412000
+      required: [status, version, services, timestamp]
+
+    ServiceInfo:
+      type: object
+      properties:
+        name:
+          type: string
+          example: smart-home-app
+        url:
+          type: string
+          example: http://smarthome-app:8080
+        description:
+          type: string
+          example: Монолитное приложение Smart Home
+      required: [name, url, description]

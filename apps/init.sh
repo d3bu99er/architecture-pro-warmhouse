@@ -3,29 +3,27 @@
 # Exit on any error
 set -e
 
-echo "Starting the Smart Home Sensor API..."
-echo "Building and starting containers..."
-docker-compose up --build -d
+echo "Запускаю Smart Home Sensor API, Temperature API, API Gateway and Device Service..."
+sleep 2
+echo "Собираю и запускаю лучшие контейнеры в мире..."
+sleep 2
+docker compose up --build -d
 
-echo "Waiting for services to be ready..."
-# Wait for PostgreSQL to be ready
-for i in {1..30}; do
-  if docker exec smarthome-postgres pg_isready -U postgres > /dev/null 2>&1; then
-    echo "PostgreSQL is ready!"
-    break
-  fi
-  echo "Waiting for PostgreSQL to start... ($i/30)"
-  sleep 1
-done
-
-# Check if PostgreSQL is ready
-if ! docker exec smarthome-postgres pg_isready -U postgres > /dev/null 2>&1; then
-  echo "Error: PostgreSQL did not start within the expected time."
-  exit 1
-fi
-
-echo "All services are up and running!"
-echo "The API is available at http://localhost:8080"
+echo "Все контейнеры подняты, сервисы на них запущены!"
+echo "http://localhost:8000 for API-GATEWAY"
+echo "http://localhost:8080 for MONOLIT-API"
+echo "http://localhost:8081 for TEMPERATURE-API"
+echo "http://localhost:8082 for DEVICE-SERVICE"
+echo "http://localhost:2181 for ZOOKEEPER"
+echo "http://localhost:9092 for KAFKA"
 echo ""
-echo "To view logs, run: docker-compose logs -f"
-echo "To stop the services, run: docker-compose down"
+echo ""
+echo "Для проверки api-gateway используйте: curl -f http://localhost:8000/health"
+echo "Для проверки smarthome-app используйте: curl -f http://localhost:8080/health"
+echo "Для проверки temperature-api используйте: curl http://localhost:8081/health"
+echo "Для проверки temperature-api используйте: curl http://localhost:8081/health"
+echo "Для проверки device-service используйте: curl http://localhost:8081/health/ready"
+echo ""
+echo "Команда для просмотра логов: docker compose logs -f"
+echo "Команда для остановки сервиса контейнеров: docker-compose down"
+echo "Команда для переcборки контейнеров: docker compose down -v && docker compose up --build -d"

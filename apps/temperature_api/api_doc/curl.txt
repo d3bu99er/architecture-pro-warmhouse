@@ -1,0 +1,32 @@
+== GET /health
+curl -X GET "http://localhost:8081/health" \
+  -H "Accept: application/json"
+
+== GET /temperature?location={room}
+# Гостиная
+curl -X GET "http://localhost:8081/temperature?location=Living%20Room" \
+  -H "Accept: application/json"
+
+# Спальня
+curl -X GET "http://localhost:8081/temperature?location=Bedroom" \
+  -H "Accept: application/json"
+
+# Кухня
+curl -X GET "http://localhost:8081/temperature?location=Kitchen" \
+  -H "Accept: application/json"
+
+== GET /temperature/{id}
+# Датчик 1 (Living Room)
+curl -X GET "http://localhost:8081/temperature/1" \
+  -H "Accept: application/json"
+
+# Датчик 2 (Bedroom)
+curl -X GET "http://localhost:8081/temperature/2" \
+  -H "Accept: application/json"
+
+# Датчик 3 (Kitchen)
+curl -X GET "http://localhost:8081/temperature/3" \
+  -H "Accept: application/json"
+
+API работает на порту 8081 и поддерживает только валидные значения: комнаты (Kitchen|Bedroom|Living Room) и ID датчиков (1|2|3).
+При каждом запросе значение температуры отлично от предыдущего.

@@ -1,0 +1,13 @@
+server:
+  port: 8082
+
+database:
+  host: ${DATABASE_HOST:localhost}
+  port: ${DATABASE_PORT:5432}
+  name: ${DATABASE_NAME:smarthome_devices}
+  user: ${DATABASE_USER:postgres}
+  password: ${DATABASE_PASSWORD:postgres}
+
+kafka:
+  bootstrap_servers: ${KAFKA_BROKERS:localhost:9092}
+  topic: device.events

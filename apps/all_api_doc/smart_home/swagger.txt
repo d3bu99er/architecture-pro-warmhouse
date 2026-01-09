@@ -1,0 +1,194 @@
+openapi: 3.0.3
+info:
+  title: Smart Home Sensors API
+  version: 1.0.0
+  description: API для управления сенсорами умного дома (температура, влажность и др.)
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Локальный сервер разработки
+
+paths:
+  /sensors:
+    get:
+      summary: Получить список всех сенсоров
+      operationId: listSensors
+      tags:
+        - Sensors
+      responses:
+        '200':
+          description: Список сенсоров
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Sensor'
+
+    post:
+      summary: Создать новый сенсор
+      operationId: createSensor
+      tags:
+        - Sensors
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SensorCreate'
+      responses:
+        '201':
+          description: Сенсор успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sensor'
+
+  /sensors/{id}:
+    get:
+      summary: Получить информацию о сенсоре по ID
+      operationId: getSensor
+      tags:
+        - Sensors
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор сенсора
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Данные сенсора
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sensor'
+        '404':
+          description: Сенсор не найден
+
+    put:
+      summary: Обновить данные сенсора
+      operationId: updateSensor
+      tags:
+        - Sensors
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SensorUpdate'
+      responses:
+        '200':
+          description: Сенсор успешно обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sensor'
+        '404':
+          description: Сенсор не найден
+
+    delete:
+      summary: Удалить сенсор по ID
+      operationId: deleteSensor
+      tags:
+        - Sensors
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Сенсор успешно удален
+        '404':
+          description: Сенсор не найден
+
+components:
+  schemas:
+    SensorType:
+      type: string
+      enum:
+        - temperature
+      description: Тип сенсора
+
+    Sensor:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Комнатный термометр
+        type:
+          $ref: '#/components/schemas/SensorType'
+        location:
+          type: string
+          example: Гостиная
+        value:
+          type: number
+          format: float
+          example: 22.5
+        unit:
+          type: string
+          example: °C
+        status:
+          type: string
+          example: online
+        last_updated:
+          type: string
+          format: date-time
+          example: 2026-01-09T12:00:00Z
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - type
+        - location
+        - created_at
+
+    SensorCreate:
+      type: object
+      required:
+        - name
+        - type
+        - location
+      properties:
+        name:
+          type: string
+          example: Уличный термометр
+        type:
+          $ref: '#/components/schemas/SensorType'
+        location:
+          type: string
+          example: Балкон
+        unit:
+          type: string
+          example: °C
+
+    SensorUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/SensorType'
+        location:
+          type: string
+        value:
+          type: number
+          format: float
+        unit:
+          type: string
+        status:
+          type: string

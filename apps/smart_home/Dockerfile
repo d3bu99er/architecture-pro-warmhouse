@@ -1,35 +1,35 @@
-# Build stage
+# Стадия сборки
 FROM golang:1.22-alpine AS builder
 
-# Set working directory
+# Установка рабочей директории
 WORKDIR /app
 
-# Copy go.mod and go.sum files
+# Копирование файлов go.mod и go.sum
 COPY go.mod go.sum ./
 
-# Download dependencies
+# Скачивание зависимостей
 RUN go mod download
 
-# Copy the source code
+# Копирование исходного кода
 COPY . .
 
-# Build the application
+# Сборка приложения
 RUN CGO_ENABLED=0 GOOS=linux go build -o smarthome
 
-# Runtime stage
+# Стадия выполнения
 FROM alpine:latest
 
-# Install necessary runtime dependencies
+# Установка необходимых зависимостей
 RUN apk --no-cache add ca-certificates tzdata
 
-# Set working directory
+# Установка рабочей директории
 WORKDIR /app
 
-# Copy the binary from the builder stage
+# Копирование бинарного файла из стадии сборки
 COPY --from=builder /app/smarthome .
 
-# Expose the port the app runs on
+# Открытие порта, на котором работает приложение
 EXPOSE 8080
 
-# Command to run the application
+# Команда для запуска приложения
 CMD ["./smarthome"]

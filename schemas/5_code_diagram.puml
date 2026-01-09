@@ -1,0 +1,18 @@
+@startuml
+!theme plain
+
+Gateway --> DeviceController
+DeviceController --> DeviceCoreService
+DeviceCoreService --> DeviceRepository
+DeviceController --> DeviceDto
+DeviceCoreService ..> KafkaEventPublisher
+DeviceCoreService --> DeviceCahcheManager
+DeviceRepository --> DeviceModels
+DeviceRepository --> PostgreSQL
+DeviceRepository --> Device
+Device --> DeviceType
+Device --> DeviceStatus
+DeviceDto --> DeviceType
+DeviceDto --> DeviceStatus
+
+@enduml

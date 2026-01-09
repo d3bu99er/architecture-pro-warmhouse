@@ -1,0 +1,61 @@
+== Health & Системные
+curl "http://localhost:8082/"                           # Root
+curl "http://localhost:8082/health/"                    # Health  
+curl "http://localhost:8082/health/ready"               # Ready
+curl "http://localhost:8082/health/live"                # Live
+
+== Базовые GET
+curl "http://localhost:8082/api/v1/devices/"            # Все устройства
+curl "http://localhost:8082/api/v1/devices/1"           # ID=1
+curl "http://localhost:8082/api/v1/devices/2"           # ID=2
+
+== Фильтры
+curl "http://localhost:8082/api/v1/devices/?type=temperature_sensor"
+curl "http://localhost:8082/api/v1/devices/?status=online"           
+curl "http://localhost:8082/api/v1/devices/?user_id=1"               
+curl "http://localhost:8082/api/v1/devices/?location=kitchen"        
+
+== CREATE (POST)
+curl -X POST "http://localhost:8082/api/v1/devices/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "New Motion Sensor", 
+    "type": "motion_sensor",
+    "location": "Hallway",
+    "status": "online",
+    "mac_address": "MO:TI:ON:SE:NS:OR",
+    "user_id": 1
+  }'
+
+== UPDATE (PUT)
+curl -X PUT "http://localhost:8082/api/v1/devices/1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Temperature Sensor",
+    "type": "temperature_sensor", 
+    "location": "Kitchen",
+    "status": "maintenance",
+    "mac_address": "13:37:20:79:05:A3",
+    "user_id": 1
+  }'
+
+== PATCH статус & Heartbeat
+curl -X PATCH "http://localhost:8082/api/v1/devices/1/status" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "online"}'
+
+curl -X POST "http://localhost:8082/api/v1/devices/1/heartbeat" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "ip_address": "192.168.1.100",
+    "firmware_version": "2.1.0"
+  }'
+
+== DELETE
+curl -X DELETE "http://localhost:8082/api/v1/devices/999"  # 404
+curl -X DELETE "http://localhost:8082/api/v1/devices/1"    # Удалить #1
+
+== Счетчики & Stats
+curl "http://localhost:8082/api/v1/devices/stats/"
+curl "http://localhost:8082/api/v1/devices/types/"
+curl "http://localhost:8082/api/v1/devices/statuses/"

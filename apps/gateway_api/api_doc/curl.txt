@@ -1,0 +1,51 @@
+== GET /health
+curl -X GET "http://localhost:8000/health" \
+  -H "Accept: application/json"
+
+== GET /gateway/status
+curl -X GET "http://localhost:8000/gateway/status" \
+  -H "Accept: application/json"
+
+== GET /gateway/services
+curl -X GET "http://localhost:8000/gateway/services" \
+  -H "Accept: application/json"
+
+Примеры curl для прокси‑роутов
+== Прокси на сервис датчиков: /api/v1/sensors
+# Проксированный GET на список сенсоров
+curl -X GET "http://localhost:8000/api/v1/sensors" \
+  -H "Accept: application/json"
+
+# Проксированный GET конкретного сенсора
+curl -X GET "http://localhost:8000/api/v1/sensors/1" \
+  -H "Accept: application/json"
+
+# Проксированный POST (создание сенсора)
+curl -X POST "http://localhost:8000/api/v1/sensors" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Room sensor",
+    "type": "temperature",
+    "location": "Living Room",
+    "unit": "°C"
+  }'
+
+== Прокси на сервис устройств: /api/v1/devices
+# Проксированный GET список устройств
+curl -X GET "http://localhost:8000/api/v1/devices" \
+  -H "Accept: application/json"
+
+# Проксированный PUT обновление устройства
+curl -X PUT "http://localhost:8000/api/v1/devices/123" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Smart Lamp",
+    "status": "on"
+  }'
+
+Catch‑all прокси (любой путь)
+# Любой другой маршрут идет в Smart Home App
+curl -X GET "http://localhost:8000/ui/dashboard" \
+  -H "Accept: text/html"
+
+Все методы (GET/POST/PUT/DELETE/...) на прокси‑роутах передаются дальше с сохранением пути, query‑параметров, заголовков и тела.
