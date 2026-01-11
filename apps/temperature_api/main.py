@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import Optional
 import random
 import uvicorn
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 
@@ -94,7 +94,7 @@ def generate_temperature_data(location: str, sensor_id: str) -> TemperatureData:
     return TemperatureData(
         value=value,
         unit="°C",
-        timestamp=datetime.now(),
+        timestamp=datetime.now(timezone.utc).isoformat(),
         location=location,
         status="active",
         sensor_id=sensor_id,

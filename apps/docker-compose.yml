@@ -30,6 +30,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - smarthome-network
 
   # Warm House App (monolit)
   app:

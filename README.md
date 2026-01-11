@@ -92,10 +92,10 @@
 
 ### 2. Документация API
 
-- [Документация API для сервиса smart_home (MONOLIT)](./smart_home/api_doc/swagger.txt)
-- [Документация API для сервиса gateway_api](./gateway_api/api_doc/swagger.txt)
-- [Документация API для сервиса temperature_api](./temperature_api/api_doc/swagger.txt)
-- [Документация API для сервиса device_service](./device_service/api_doc/swagger.txt)
+- [Документация API для сервиса smart_home (MONOLIT)](./apps/smart_home/api_doc/swagger.txt)
+- [Документация API для сервиса gateway_api](./apps/gateway_api/api_doc/swagger.txt)
+- [Документация API для сервиса temperature_api](./apps/temperature_api/api_doc/swagger.txt)
+- [Документация API для сервиса device_service](./apps/device_service/api_doc/swagger.txt)
 
 # Задание 5. Работа с docker и docker-compose
 
@@ -186,7 +186,7 @@ temperature-api:
 
 В результате созданы Dockerfiles для каждого микросервиса и docker-compose для их запуска.
 Проверить работоспособность api каждого микросервиса можно с помощью curl запросов:
-- [CURL запросы для smart_home (MONOLIT)](./smart_home/api_doc/curl.txt)
-- [CURL запросы для gateway_api](./gateway_api/api_doc/curl.txt)
-- [CURL запросы для temperature_api](./temperature_api/api_doc/curl.txt)
-- [CURL запросы для device_service](./device_service/api_doc/curl.txt)
+- [CURL запросы для smart_home (MONOLIT)](./apps/smart_home/api_doc/curl.txt)
+- [CURL запросы для gateway_api](./apps/gateway_api/api_doc/curl.txt)
+- [CURL запросы для temperature_api](./apps/temperature_api/api_doc/curl.txt)
+- [CURL запросы для device_service](./apps/device_service/api_doc/curl.txt)
