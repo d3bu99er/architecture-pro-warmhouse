@@ -1,0 +1,90 @@
+@startuml
+title Диаграмма компонентов. Device Management Service.
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+
+
+Container_Boundary(device_service, "Device Management Service - Python/FastAPI") {
+    
+    ' API КОМПОНЕНТЫ
+	Component(command_controller, "Command Controller", "Python REST Controller", "REST контроллер для команд управления устройствами")
+    Component(device_controller, "Device Controller", "Python REST Controller", "REST контроллер для CRUD операций, статуса и конфигурации устройств")
+    Component(integration_controller, "Integration Controller", "Python REST Controller", "REST контроллер для интеграции с внешними IoT устройствами")
+    
+    ' БИЗНЕС-ЛОГИКА
+    Component(core_service, "Device Core Service", "Python Service", "Бизнес-логика жизненного цикла устройств")
+    Component(command_service, "Device Command Service", "Python Service", "Обработка и отправка команд устройствам")
+    Component(status_service, "Device Status Service", "Python Service", "Мониторинг доступности и статуса устройств")
+    Component(validator, "Device Validator", "Python Component", "Валидация устройств и конфигураций")
+    
+    ' ИНТЕГРАЦИОННЫЕ КОМПОНЕНТЫ
+    Component(protocol_adapter, "IoT Protocol Adapter", "Python Component", "Адаптер протоколов MQTT, CoAP, HTTP")
+    Component(partner_adapter, "Partner Device Adapter", "Python Component", "Адаптер для устройств партнёров")
+    Component(event_publisher, "Kafka Event Publisher", "Kafka Producer Client", "Публикация событий в Kafka")
+    
+    ' ХРАНЕНИЕ ДАННЫХ
+    Component(device_repository, "Device Repository", "SQLAlchemy", "Репозиторий данных устройств в PostgreSQL")
+    Component(cache_manager, "Device Cache Manager", "Python Redis", "Кэширование статуса устройств")
+    Component(config_store, "Device Config Store", "Python Component", "Хранение и управление конфигурациями устройств")
+    
+    ' МОДЕЛИ ДАННЫХ
+    Component(device_models, "Device Models", "SQLAlchemy", "Модели данных устройств: Device, DeviceType, DeviceStatus, Configuration")
+    Component(device_dto, "Device DTOs", "DTOs", "Объекты передачи данных для API: DeviceDto, CommandDto, StatusDto")
+}
+
+' ОПИСАНИЕ ВНЕШНИХ ЗАВИСИМОСТЕЙ ИЗ CONTAINER ДИАГРАММЫ ==
+Container(api_gateway, "API Gateway", "Python/FastAPI", "Единая точка входа и маршрутизация")
+ContainerDb(device_db, "Device Database", "PostgreSQL", "База данных устройств")
+ContainerDb(cache, "Cache", "Redis", "Кэш статуса устройств")
+Container(message_broker, "Message Broker", "Apache Kafka", "Брокер сообщений")
+
+' ОПИСАНИЕ ВНЕШНИХ СИСТЕМ ИЗ CONTEXT ДИАГРАММЫ ==
+System_Ext(smart_devices, "Умные устройства", "IoT устройства в домах: освещение, климат, бытовая техника, камеры, датчики движения и т.д.")
+System_Ext(partner_devices, "Устройства партнёров", "Сторонние совместимые устройства")
+
+' ОПИСАНИЕЙ МИКРОСЕРВИСОВ ИЗ CONTAINER ДИАГРАММЫ ==
+Container(telemetry_service, "Telemetry Service", "Python/FastAPI", "Сбор телеметрии")
+Container(notification_service, "Notification Service", "Node.js", "Уведомления")
+
+' ОПИСАНИЕ СВЯЗЕЙ С API GATEWAY ==
+Rel(api_gateway, device_controller, "Маршрутизация CRUD запросов", "HTTP/gRPC")
+Rel(api_gateway, command_controller, "Маршрутизация команд", "HTTP/gRPC")
+Rel(api_gateway, integration_controller, "Маршрутизация интеграции", "HTTP/gRPC")
+
+' ОПИСАНИЕ ВНУТРЕННИЕ СВЯЗЕЙ API С СЕРВИСАМИ ==
+Rel(device_controller, core_service, "Делегирование бизнес-логики", "Method calls")
+Rel(command_controller, command_service, "Обработка команд", "Method calls")
+Rel(integration_controller, partner_adapter, "Интеграция партнёров", "Method calls")
+
+' ОПИСАНИЕ СВЯЗЕЙ DTO ==
+Rel(device_controller, device_dto, "Сериализация ответов", "JSON struct tags")
+Rel(command_controller, device_dto, "Команды и статусы", "JSON struct tags")
+Rel(integration_controller, device_dto, "Интеграционные DTO", "JSON struct tags")
+
+' ОПИСАНИЕ СВЯЗЕЙ МЕЖДУ СЕРВИСАМИ ==
+Rel(core_service, validator, "Валидация", "Method calls")
+Rel(core_service, device_repository, "CRUD с БД", "SQLAlchemy calls")
+Rel(core_service, cache_manager, "Кэширование статуса", "Redis calls")
+Rel(core_service, event_publisher, "Публикация событий", "Kafka publish")
+Rel(command_service, protocol_adapter, "Команды по протоколам", "MQTT/CoAP/HTTP")
+Rel(command_service, status_service, "Обновление статуса", "Method calls")
+Rel(status_service, cache_manager, "Обновление кэша", "Redis calls")
+Rel(status_service, event_publisher, "События статуса", "Kafka publish")
+
+' ОПИСАНИЕ СОБЫТИЙ В KAFKA ==
+Rel(event_publisher, message_broker, "События устройств", "Kafka produce")
+Rel(message_broker, telemetry_service, "Для телеметрии", "Kafka consume") 
+Rel(message_broker, notification_service, "Для уведомлений", "Kafka consume")
+
+' ОПИСАНИЕ СВЯЗЕЙ С ВНЕШНИМИ УСТРОЙСТВАМИ ==
+Rel(protocol_adapter, smart_devices, "Управление и мониторинг", "MQTT/CoAP/HTTP")
+Rel(partner_adapter, partner_devices, "Интеграция", "IoT протоколы")
+
+' ОПИСАНИЕ СВЯЗЕЙ С ХРАНИЛИЩАМИ ДАННЫХ ==
+Rel(device_repository, device_db, "SQL запросы", "PostgreSQL/pgx")
+Rel(device_repository, device_models, "Маппинг сущностей", "SQLAlchemy mapping")
+Rel(cache_manager, cache, "Кэширования", "Redis protocol")
+Rel(config_store, device_db, "Хранение конфигураций", "PostgreSQL")
+Rel(config_store, device_models, "Модели конфигураций", "SQLAlchemy mapping")
+
+@enduml

@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "device-service"
+version = "1.0.0"
+description = "Smart Home Device Management Microservice"
+authors = ["Your Team <team@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.115.0"
+uvicorn = {extras = ["standard"], version = "^0.30.6"}
+sqlalchemy = "^2.0.36"
+psycopg2-binary = "^2.9.9"
+aiokafka = "^0.9.0"
+pydantic = "^2.9.2"
+pydantic-settings = "^2.5.2"
+python-multipart = "^0.0.9"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+pyyaml = "^6.0.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

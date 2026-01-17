@@ -1,0 +1,82 @@
+@startuml
+title Диаграмма контейнеров целевой системы "Умный дом" (TO-BE)
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+' ОПИСАНИЕ ПЕРСОН ==
+Person(homeowner, "Владелец дома", "Управляет устройствами, просматривает телеметрию")
+Person(support_team, "Команда поддержки", "Осуществляет техническую поддержку пользователей")
+
+' ОПИСАНИЕ КОНТЕЙНЕРОВ ==
+System_Boundary(smart_home_platform, "Платформа «Умный дом» - микросервисная архитектура") {
+    
+    Container(web_app, "Веб-приложение", "React", "Облачный интерфейс SaaS для управления устройствами")
+	Container(api_gateway, "API Gateway", "Python/FastAPI", "Единый входной интерфейс, который отвечает за проверку пользователя и перенаправление запросов к микросервисам")
+    Container(support_portal, "Портал поддержки", "React/Admin UI", "Панель управления для службы технической поддержки")
+    Container(mobile_app, "Мобильное приложение", "React Native/Flutter", "Веб-интерфейс SaaS в облаке для контроля устройств")
+    
+    ' МИКРОСЕРВИСЫ ПО ДОМЕНАМ
+    Container(device_service, "Device Management Service", "Python/FastAPI", "Регистрация устройств, их настройка и мониторинг состояния")
+    Container(notification_service, "Notification Service", "Node.js", "Уведомления, оповещения и push-уведомления")
+    Container(user_service, "User Management Service", "Go", "Управление пользователями, их профилями и процессом аутентификации")
+	Container(billing_service, "Billing Service", "Go", "Управление подписками, тарифными планами и платежами")
+    Container(telemetry_service, "Telemetry Service", "Python/FastAPI", "Сбор и обработка телеметрии с устройств")
+    
+    ' АСИНХРОННАЯ ОБРАБОТКА
+    Container(message_broker, "Message Broker", "Apache Kafka", "Обеспечение асинхронной обработки событий между микросервисами")
+    
+    ' ХРАНИЛИЩА ДАННЫХ
+    ContainerDb(user_db, "User Database", "PostgreSQL", "Профили, пользователи, настройки")
+    ContainerDb(device_db, "Device Database", "PostgreSQL", "Устройства, конфигурации, статус")
+    ContainerDb(telemetry_db, "Telemetry Database", "InfluxDB", "Временные данные телеметрии")
+    ContainerDb(billing_db, "Billing Database", "PostgreSQL", "Платежи, подписки")
+    ContainerDb(cache, "Cache", "Redis", "Кеширование сессий и частых запросов")
+}
+
+System_Ext(smart_devices, "Умные устройства", "IoT устройства в доме: освещение, климат, бытовая техника, камеры, датчики движения и т.д.")
+System_Ext(partner_devices, "Устройства партнёров", "Сторонние совместимые устройства")
+System_Ext(payment_system, "Платёжная система", "Внешний сервис обработки платежей ЮКасса/CloudPayments/Сбербанк Онлайн‑эквайринг")
+
+' ОПИСАНИЕ ВЗАИМОДЕЙСТВИЯ ПОЛЬЗОВАТЕЛЬСКИХ ИНТЕРФЕЙСОВ ==
+Rel(homeowner, web_app, "Использует", "HTTPS")
+Rel(homeowner, mobile_app, "Использует", "HTTPS")
+Rel(support_team, support_portal, "Предоставляет поддержку", "HTTPS")
+
+' ОПИСАНИЕ ВЗАИМОДЕЙСТВИЯ С API ==
+Rel(web_app, api_gateway, "API вызовы", "HTTPS/REST")
+Rel(mobile_app, api_gateway, "API вызовы", "HTTPS/REST")
+Rel(support_portal, api_gateway, "Support API", "HTTPS/REST")
+
+' ОПИСАНИЕ ВЗАИМОДЕЙСТВИЯ API С СЕРВИСАМИ ==
+Rel(api_gateway, device_service, "Управление устройствами", "HTTP/gRPC")
+Rel(api_gateway, telemetry_service, "Телеметрия", "HTTP/REST")
+Rel(api_gateway, user_service, "Пользователи", "HTTP/gRPC")
+Rel(api_gateway, billing_service, "Биллинг", "HTTP/REST")
+
+' ОПИСАНИЕ ВЗАИМОДЕЙСТВИЯ СЕРВИСОВ С БД ==
+Rel(device_service, device_db, "Читает/записывает", "PostgreSQL")
+Rel(telemetry_service, telemetry_db, "Записывает данные временной телеметрии", "InfluxDB")
+Rel(user_service, user_db, "Читает/записывает", "PostgreSQL")
+Rel(billing_service, billing_db, "Читает/записывает", "PostgreSQL")
+
+' ОПИСАНИЕ ВЗАИМОДЕЙСТВИЯ КЕШИРОВАНИЯ ==
+Rel(telemetry_service, cache, "Кеширует последние значения телеметрии", "Redis")
+Rel(device_service, cache, "Кеширует статус устройств", "Redis")
+Rel(user_service, cache, "Кеширует сессии", "Redis")
+
+' ОПИСАНИЕ АСИНХРОННЫХ ВЗАИМОДЕЙСТВИЙ ==
+Rel(message_broker, notification_service, "События для уведомлений", "Kafka Consumer")
+Rel(billing_service, message_broker, "События платежей", "Kafka")
+Rel(device_service, message_broker, "События устройств", "Kafka")
+Rel(telemetry_service, message_broker, "События телеметрии", "Kafka")
+
+' ОПИСАНИЕ ВЗАИМОДЕЙСТВИЯ С ВНЕШНИМИ СИСТЕМАМИ ==
+Rel(billing_service, payment_system, "Обработка платежей", "HTTPS/API")
+Rel(telemetry_service, smart_devices, "Сбор телеметрии", "MQTT/HTTP")
+Rel(telemetry_service, partner_devices, "Сбор телеметрии", "MQTT/HTTP")
+Rel(device_service, smart_devices, "Управление и мониторинг", "MQTT/CoAP/HTTP")
+Rel(device_service, partner_devices, "Интеграция", "Стандартные IoT протоколы")
+
+' ОПИСАНИЕ ВЗАИМОДЕЙСТВИЙ УВЕДОМЛЕНИЙ ==
+Rel(notification_service, web_app, "Push уведомления", "WebSocket")
+Rel(notification_service, mobile_app, "Push уведомления", "FCM/APNS")
+@enduml

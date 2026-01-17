@@ -1,0 +1,391 @@
+openapi: 3.0.3
+info:
+  title: Device Management API
+  version: 1.0.0
+  description: Микросервис управления устройствами умного дома
+
+servers:
+  - url: http://localhost:8082
+    description: Device Service (порт 8082)
+
+paths:
+  /:
+    get:
+      summary: Root endpoint
+      tags: [Health]
+      responses:
+        '200':
+          description: Root информация
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /health:
+    get:
+      summary: Health check сервиса
+      tags: [Health]
+      responses:
+        '200':
+          description: Сервис здоров
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /health/ready:
+    get:
+      summary: Ready check (готовность к трафику)
+      tags: [Health]
+      responses:
+        '200':
+          description: Сервис готов
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ready
+
+  /health/live:
+    get:
+      summary: Live check (жизнеспособность)
+      tags: [Health]
+      responses:
+        '200':
+          description: Сервис жив
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: live
+
+  /api/v1/devices:
+    get:
+      summary: Получить список устройств с фильтрами
+      tags: [Device Management]
+      parameters:
+        - name: type
+          in: query
+          description: Фильтр по типу (temperature_sensor, motion_sensor)
+          schema:
+            type: string
+            example: temperature_sensor
+        - name: status
+          in: query
+          description: Фильтр по статусу (online, offline, maintenance)
+          schema:
+            type: string
+            example: online
+        - name: user_id
+          in: query
+          description: Фильтр по пользователю
+          schema:
+            type: integer
+            example: 1
+        - name: location
+          in: query
+          description: Фильтр по локации
+          schema:
+            type: string
+            example: kitchen
+      responses:
+        '200':
+          description: Список устройств
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Device'
+
+    post:
+      summary: Создать новое устройство
+      tags: [Device Management]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceCreate'
+      responses:
+        '201':
+          description: Устройство создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+
+  /api/v1/devices/{device_id}:
+    get:
+      summary: Получить устройство по ID
+      tags: [Device Management]
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Данные устройства
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '404':
+          description: Устройство не найдено
+
+    put:
+      summary: Полное обновление устройства
+      tags: [Device Management]
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceUpdate'
+      responses:
+        '200':
+          description: Обновленные данные устройства
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '404':
+          description: Устройство не найдено
+
+    delete:
+      summary: Удалить устройство
+      tags: [Device Management]
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '204':
+          description: Устройство удалено
+        '404':
+          description: Устройство не найдено
+
+  /api/v1/devices/{device_id}/status:
+    patch:
+      summary: Обновить статус устройства
+      tags: [Device Management]
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceStatusUpdate'
+      responses:
+        '200':
+          description: Обновленный статус
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '404':
+          description: Устройство не найдено
+
+  /api/v1/devices/{device_id}/heartbeat:
+    post:
+      summary: Регистрация heartbeat от устройства
+      tags: [Device Management]
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HeartbeatRequest'
+      responses:
+        '200':
+          description: Heartbeat зарегистрирован
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Heartbeat registered successfully
+
+  /api/v1/devices/stats:
+    get:
+      summary: Статистика устройств
+      tags: [Device Management]
+      responses:
+        '200':
+          description: Статистика устройств
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceStats'
+
+  /api/v1/devices/types:
+    get:
+      summary: Доступные типы устройств
+      tags: [Device Management]
+      responses:
+        '200':
+          description: Список типов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  example: temperature_sensor
+
+  /api/v1/devices/statuses:
+    get:
+      summary: Доступные статусы устройств
+      tags: [Device Management]
+      responses:
+        '200':
+          description: Список статусов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  example: online
+
+components:
+  schemas:
+    Device:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Temperature Sensor
+        type:
+          type: string
+          example: temperature_sensor
+        location:
+          type: string
+          example: Kitchen
+        status:
+          type: string
+          example: online
+        mac_address:
+          type: string
+          example: 13:37:20:79:05:A3
+        user_id:
+          type: integer
+          example: 1
+      required: [id, name, type, status]
+
+    DeviceCreate:
+      type: object
+      required: [name, type, location]
+      properties:
+        name:
+          type: string
+          example: New Motion Sensor
+        type:
+          type: string
+          example: motion_sensor
+        location:
+          type: string
+          example: Hallway
+        status:
+          type: string
+          example: online
+        mac_address:
+          type: string
+          example: MO:TI:ON:SE:NS:OR
+        user_id:
+          type: integer
+          example: 1
+
+    DeviceUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Updated Temperature Sensor
+        type:
+          type: string
+          example: temperature_sensor
+        location:
+          type: string
+          example: Kitchen
+        status:
+          type: string
+          example: maintenance
+        mac_address:
+          type: string
+          example: 13:37:20:79:05:A3
+        user_id:
+          type: integer
+          example: 1
+
+    DeviceStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          example: online
+
+    HeartbeatRequest:
+      type: object
+      properties:
+        ip_address:
+          type: string
+          example: 192.168.1.100
+        firmware_version:
+          type: string
+          example: 2.1.0
+
+    DeviceStats:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 25
+        online:
+          type: integer
+          example: 20
+        offline:
+          type: integer
+          example: 5

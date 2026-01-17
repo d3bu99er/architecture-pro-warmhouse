@@ -1,0 +1,117 @@
+openapi: 3.0.3
+info:
+  title: Temperature API
+  description: Микросервис для получения данных о температуре с датчиков умного дома
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8081
+    description: Temperature API
+
+paths:
+  /health:
+    get:
+      summary: Проверка состояния сервиса
+      operationId: healthCheck
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Сервис работает корректно
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /temperature:
+    get:
+      summary: Получить температуру по названию комнаты
+      operationId: getTemperatureByLocation
+      tags:
+        - Temperature
+      parameters:
+        - name: location
+          in: query
+          description: Название комнаты (Kitchen, Bedroom, Living Room)
+          required: true
+          schema:
+            type: string
+            enum: [Kitchen, Bedroom, "Living Room"]
+      responses:
+        '200':
+          description: Данные о температуре
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemperatureData'
+        '400':
+          description: Неверная локация
+
+  /temperature/{id}:
+    get:
+      summary: Получить температуру по ID датчика
+      operationId: getTemperatureBySensorId
+      tags:
+        - Temperature
+      parameters:
+        - name: id
+          in: path
+          description: ID датчика (1, 2, 3)
+          required: true
+          schema:
+            type: string
+            enum: ["1", "2", "3"]
+      responses:
+        '200':
+          description: Данные о температуре
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemperatureData'
+        '400':
+          description: Неверный ID датчика
+
+components:
+  schemas:
+    TemperatureData:
+      type: object
+      properties:
+        value:
+          type: number
+          format: float
+          example: 22.5
+        unit:
+          type: string
+          example: °C
+        timestamp:
+          type: string
+          format: date-time
+          example: 2026-01-09T12:50:00Z
+        location:
+          type: string
+          example: Living Room
+        status:
+          type: string
+          example: active
+        sensor_id:
+          type: string
+          example: "1"
+        sensor_type:
+          type: string
+          example: temperature
+        description:
+          type: string
+          example: Temperature sensor in Living Room
+      required:
+        - value
+        - unit
+        - timestamp
+        - location
+        - status
+        - sensor_id
+        - sensor_type
+        - description

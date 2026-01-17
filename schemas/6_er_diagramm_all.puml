@@ -1,0 +1,41 @@
+@startuml
+
+!define CORE_ENTITY(name,desc) class name as "desc" << (C,#FF6B6B) >>
+!define SUPPORT_ENTITY(name,desc) class name as "desc" << (S,#4ECDC4) >>
+!define FUTURE_ENTITY(name,desc) class name as "desc" << (F,#DDDDDD) >>
+
+title Тёплый дом ER-диаграмма (ALL)
+
+' ОПИСАНИЕ ДОМЕНА ПОЛЬЗОВАТЕЛЕЙ ==
+package "User Domain" {
+    CORE_ENTITY(User, "User\n---\nid: UUID [PK]\nemail: VARCHAR(255)\nfirst_name: VARCHAR(100)\nlast_name: VARCHAR(100)\nis_active: BOOLEAN")
+    CORE_ENTITY(Household, "Household\n---\nid: UUID [PK]\nowner_id: UUID [FK]\nname: VARCHAR(100)\naddress: TEXT")
+}
+
+' ОПИСАНИЕ ДОМЕНА БИЛЛИНГА ==
+package "Billing Domain" {
+    CORE_ENTITY(Subscription, "Subscription\n---\nid: UUID [PK]\nuser_id: UUID [FK]\nplan_id: UUID [FK]\nstatus: VARCHAR(20)\nstarted_at: TIMESTAMP\nends_at: TIMESTAMP")
+    CORE_ENTITY(PricingPlan, "PricingPlan\n---\nid: UUID [PK]\nname: VARCHAR(100)\ndescription: TEXT\nprice: DECIMAL(10,2)\nbilling_interval: VARCHAR(20)\ndevice_limit: INTEGER\nis_active: BOOLEAN")
+}
+
+
+' ОПИСАНИЕ ДОМЕНА УСТРОЙСТВ ==
+package "Device Domain" {
+    CORE_ENTITY(Device, "Device\n---\nid: Integer [PK]\nname: String(100) [NOT NULL]\ntype: String(50) [NOT NULL]\nlocation: String(100) [NOT NULL]\nstatus: String(20) [NOT NULL, default=offline]\nmac_address: String(17) [UNIQUE]\nip_address: String(15)\nfirmware_version: String(50)\nuser_id: Integer\ncreated_at: DateTime\nupdated_at: DateTime\nlast_seen: DateTime")
+}
+
+' ОПИСАНИЕ ДОМЕНА ТЕЛЕМЕТРИИ ==
+package "Telemetry Domain" {
+    CORE_ENTITY(TelemetryReading, "TelemetryReading\n---\nid: SERIAL [PK]\ndevice_id: VARCHAR(50)\ndevice_type: VARCHAR(50)\nmetric_name: VARCHAR(50)\nvalue: FLOAT\nunit: VARCHAR(20)\ntimestamp: TIMESTAMP")
+}
+
+' ОПИСАНИЕ ОСНОВНЫХ СВЯЗЕЙ ==
+User ||--o{ Household : "1:N владеет"
+
+User ||--o{ Device : "1:N владеет"
+Device ||--o{ TelemetryReading : "1:N генерирует"
+
+User ||--o{ Subscription : "1:N имеет"
+PricingPlan ||--o{ Subscription : "1:N определяет"
+
+@enduml

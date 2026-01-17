@@ -1,0 +1,27 @@
+@startuml
+title Диаграмма контекста монолитной сиетмы "Тёплый дом"
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+' ОПИСАНИЕ ПЕРСОН
+Person(home_owner, "Владелец дома", "Клиент, управляющий отоплением в своём доме и просматривающий температуру через web-интерфес")
+Person(connect_admin, "Монтажник", "Специалист по подключению к системе")
+
+' ОПИСАНИЕ СИСТЕМЫ
+System(WarmHouseSystem, "Монолитная система «Тёплый дом»", "Go-приложение с БД PostgreSQL для удалённого управления отоплением и мониторинга температуры")
+
+' ОИСАНИЕ ВНЕШНИХ СИСТЕМ
+System_Ext(heating_controllers, "Контроллеры отопления", "Специальные реле для включения/отключения отопления в домах")
+System_Ext(temperature_sensors, "Температурные датчики", "Датчики для измерения температуры в домах (установлены не везде)")
+
+' СИСТЕМНЫЕ ВЗАИМОДЕЙСТВИЯ С УСТРОЙСТВАМИ
+Rel(connect_admin, WarmHouseSystem, "Управляет отоплением, просматривает температуру", "HTTPS/Web")
+Rel(home_owner,WarmHouseSystem,"Подключает новое оборудование к системе", "HTTPS/Web")
+Rel(WarmHouseSystem,heating_controllers,"Команды включения/отключения отопления", "Синхронные запросы")
+Rel(WarmHouseSystem,temperature_sensors,"Запрос показаний с температурных датчиков", "Синхронные запросы")
+
+' ПРИМЕЧАНИЯ
+note left of WarmHouseSystem : **ДОП. ИНФОРМАЦИЯ:**\n• Язык: Go\n• БД: PostgreSQL\n• Протоколы: Только синхронные\n• Инициатор: Сервер → Устройство\n• Функции: Мониторинг температуры + Управление отоплением
+@enduml
